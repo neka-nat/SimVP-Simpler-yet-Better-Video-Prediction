@@ -61,7 +61,7 @@ class Exp:
 
     def _build_model(self):
         args = self.args
-        self.model = SimVP(tuple(args.in_shape), args.hid_S,
+        self.model = SimVP((args.input_len, args.channel, args.size[0], args.size[1]), args.hid_S,
                            args.hid_T, args.N_S, args.N_T).to(self.device)
 
     def _get_data(self):

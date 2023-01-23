@@ -8,4 +8,6 @@ def load_data(dataname,batch_size, val_batch_size, data_root, num_workers, **kwa
     elif dataname == 'mmnist':
         return load_mmnist(batch_size, val_batch_size, data_root, num_workers)
     elif dataname == 'image_list':
-        return load_image_list(batch_size, val_batch_size, data_root, num_workers)
+        return load_image_list(
+            batch_size, val_batch_size, data_root, num_workers, kwargs["size"], kwargs["input_len"], kwargs["channel"]
+        )

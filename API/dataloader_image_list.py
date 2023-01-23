@@ -124,13 +124,14 @@ class ImageHDF5Dataset(Dataset):
 
 def load_data(
         batch_size, val_batch_size,
-        data_root, num_workers):
+        data_root, num_workers,
+        image_size, input_len, channel):
 
     train_list = load_list(data_root + 'image_list/data/train_list.txt', os.path.join(data_root, 'image_list'))
     test_list = load_list(data_root + 'image_list/data/test_list.txt', os.path.join(data_root, 'image_list'))
 
-    train_set = ImageListDataset()
-    test_set = ImageListDataset()
+    train_set = ImageListDataset(image_size, input_len, channel)
+    test_set = ImageListDataset(image_size, input_len, channel)
     train_set.load_images(train_list)
     test_set.load_images(test_list)
 
