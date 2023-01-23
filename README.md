@@ -46,6 +46,10 @@ This project has provided an environment setting file of conda, users can easily
   bash download_mmnist.sh
 ```
 
+```
+python main.py --dataname mmnist --input_len 10 --size 64,64 --channel 1
+```
+
 ### TaxiBJ dataset
 
 We provide a [Dropbox](https://www.dropbox.com/sh/l9drnyeftcmy3j1/AACCgUyOj2akPNBwFAe9W1-ia?dl=0) to download TaxiBJ dataset. Users can download this dataset and put it into `./data/taxibj`.

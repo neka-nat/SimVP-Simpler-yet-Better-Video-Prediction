@@ -1,8 +1,7 @@
 import os
-from io import BytesIO, IOBase
+from io import IOBase
 import numpy as np
 from PIL import Image, ImageCms
-import h5py
 
 import torch
 from torch.utils.data import Dataset
@@ -53,7 +52,7 @@ def read_image(path, size, ch, c_space="RGB"):
 
 
 class ImageListDataset(Dataset):
-    def __init__(self, img_size=(160, 128), input_len=20, channels=3):
+    def __init__(self, img_size=(160, 128), input_len=10, channels=3):
         self.img_w = img_size[0]
         self.img_h = img_size[1]
         self.input_len = input_len
@@ -70,56 +69,22 @@ class ImageListDataset(Dataset):
         self.c_space = c_space
 
     def __getitem__(self, index):
-        # print("target_idx: ", index)
-        # print(self.img_paths[int(index * self.input_len):int((index + 1) * self.input_len)])
-        # print(self.img_paths[int((index + 1) * self.input_len)])
         assert self.img_paths is not None
 
         X = np.ndarray((1, self.input_len, self.img_ch, self.img_h, self.img_w), dtype=np.float32)
+        Y = np.ndarray((1, self.input_len, self.img_ch, self.img_h, self.img_w), dtype=np.float32)
         X[0] = [
             read_image(path[0], (self.img_w, self.img_h), self.img_ch, self.c_space)
-            for path in self.img_paths[int(index * self.input_len):int((index + 1) * self.input_len)]
+            for path in self.img_paths[index:(self.input_len + index)]
         ]
-        if len(self.img_paths[0]) > 1:
-            y = np.array([[
-                read_image(self.img_paths[int((index + 1) * self.input_len) - 1][1], (self.img_w, self.img_h), self.img_ch, self.c_space)
-            ]])
-        else:
-            y = np.array([[
-                read_image(self.img_paths[int((index + 1) * self.input_len)][0], (self.img_w, self.img_h), self.img_ch, self.c_space)
-            ]])
-        return X.reshape(self.input_len, self.img_ch, self.img_h, self.img_w), y.reshape(1, self.img_ch, self.img_h, self.img_w)
+        Y[0] = [
+            read_image(path[0], (self.img_w, self.img_h), self.img_ch, self.c_space)
+            for path in self.img_paths[(self.input_len + index):(self.input_len * 2 + index)]
+        ]
+        return X.reshape(self.input_len, self.img_ch, self.img_h, self.img_w), Y.reshape(self.input_len, self.img_ch, self.img_h, self.img_w)
 
     def __len__(self):
-        return len(self.img_paths[:-self.input_len:self.input_len])
-
-
-class ImageHDF5Dataset(Dataset):
-    def __init__(self, img_size=(160, 128), input_len=20, channels=3):
-        self.img_w = img_size[0]
-        self.img_h = img_size[1]
-        self.input_len = input_len
-        self.img_ch = channels
-        self.hf_data = None
-        self.mode = None
-        self.c_space = "RGB"
-
-    def load_hdf5(self, h5path, c_space="RGB"):
-        self.hf_data = h5py.File(h5path)
-        self.mode = "img" if os.path.splitext(list(self.hf_data.keys())[0])[-1] == ".jpg" else "audio"
-        self.c_space = c_space
-
-    def __getitem__(self, index):
-        assert self.hf_data is not None
-
-        keys_list = list(self.hf_data.keys())
-        X = np.ndarray((1, self.input_len, self.img_ch, self.img_h, self.img_w), dtype=np.float32)
-        X[0] = [read_image(BytesIO(np.array(self.hf_data[key])), (self.img_w, self.img_h), self.img_ch, self.c_space) for key in keys_list[int(index * self.input_len):int((index + 1) * self.input_len)]]
-        y = np.array([[read_image(BytesIO(np.array(self.hf_data[keys_list[int((index + 1) * self.input_len)]])), (self.img_w, self.img_h), self.img_ch, self.c_space)]])
-        return X.reshape(self.input_len, self.img_ch, self.img_h, self.img_w), y.reshape(1, self.img_ch, self.img_h, self.img_w)
-
-    def __len__(self):
-        return len(list(self.hf_data.keys())[:-self.input_len:self.input_len])
+        return len(self.img_paths) - 2 * self.input_len + 1
 
 
 def load_data(

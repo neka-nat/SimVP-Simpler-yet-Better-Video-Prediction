@@ -3,6 +3,7 @@ import os
 import os.path as osp
 import json
 import torch
+from PIL import Image
 import pickle
 import logging
 import numpy as np
@@ -10,6 +11,38 @@ from model import SimVP
 from tqdm import tqdm
 from API import *
 from utils import *
+
+
+def write_image(image, path, mode="img", c_space="RGB"):
+    if mode == "img":
+        img = image * 255
+        img = img.transpose(1, 2, 0)
+        img = img.astype(np.uint8)
+        h, w, ch = img.shape
+        if c_space == "RGB":
+            if ch == 1:
+                img = img.reshape((h, w))
+                result = Image.fromarray(img)
+                result.save(path + ".jpg")
+            elif ch == 4:
+                img_gray = img[:, :, 3]
+                img_color = img[:, :, :3]
+                result_gray = Image.fromarray(img_gray)
+                result_color = Image.fromarray(img_color)
+                result_gray.save(path + "_gray.jpg")
+                result_color.save(path + "_color.jpg")
+            else:
+                result = Image.fromarray(img)
+                result.save(path + ".jpg")
+        elif c_space == "LAB":
+            tmp = Image.fromarray(img, mode="LAB")
+            result = ImageCms.applyTransform(tmp, lab2rgb)
+            result.save(path + ".jpg")
+        else:
+            result = Image.fromarray(img, mode=c_space).convert("RGB")
+            result.save(path + ".jpg")
+    else:
+        np.save(path + ".npy", image)
 
 
 class Exp:
@@ -90,23 +123,39 @@ class Exp:
         config = args.__dict__
         recorder = Recorder(verbose=True)
 
+        count = 0
         for epoch in range(config['epochs']):
             train_loss = []
             self.model.train()
             train_pbar = tqdm(self.train_loader)
 
+            fn = 0
             for batch_x, batch_y in train_pbar:
                 self.optimizer.zero_grad()
                 batch_x, batch_y = batch_x.to(self.device), batch_y.to(self.device)
                 pred_y = self.model(batch_x)
 
-                loss = self.criterion(pred_y, batch_y)
+                loss = self.criterion(pred_y[:, :batch_y.shape[1], ...], batch_y)
                 train_loss.append(loss.item())
                 train_pbar.set_description('train loss: {:.4f}'.format(loss.item()))
 
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()
+
+                if epoch % 10 == 0:
+                    for j in range(batch_x.shape[1]):
+                        write_image(
+                            batch_x[0, j].detach().cpu().numpy(),
+                            'results/images/' + str(count) + '_' + str(j) + 'x',
+                        )
+                    for j in range(batch_y.shape[1]):
+                        write_image(
+                            pred_y[0, j].detach().cpu().numpy(),
+                            'results/images/' + str(count) + '_' + str(batch_x.shape[1] + j) + 'y',
+                        )
+                count += len(batch_x) * args.input_len
+                fn += len(batch_x) * args.input_len
 
             train_loss = np.average(train_loss)
 

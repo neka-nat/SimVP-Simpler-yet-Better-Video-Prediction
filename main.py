@@ -22,7 +22,7 @@ def create_parser():
     parser.add_argument('--num_workers', default=8, type=int)
 
     # model parameters
-    parser.add_argument('--input_len', default=20, type=int)
+    parser.add_argument('--input_len', default=10, type=int)
     parser.add_argument('--size', default='160,120')
     parser.add_argument('--channel', default=3, type=int)
     # parser.add_argument('--in_shape', default=[20, 3, 128, 160], type=int,nargs='*') # [10, 1, 64, 64] for mmnist, [4, 2, 32, 32] for taxibj  
@@ -33,7 +33,7 @@ def create_parser():
     parser.add_argument('--groups', default=4, type=int)
 
     # Training parameters
-    parser.add_argument('--epochs', default=51, type=int)
+    parser.add_argument('--epochs', default=500, type=int)
     parser.add_argument('--log_step', default=1, type=int)
     parser.add_argument('--lr', default=0.01, type=float, help='Learning rate')
     return parser
