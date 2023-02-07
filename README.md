@@ -33,30 +33,77 @@ From CNN, RNN, to ViT, we have witnessed remarkable advancements in video predic
 
 ## Install
 
-This project has provided an environment setting file of conda, users can easily reproduce the environment by the following commands:
-```
-  conda env create -f environment.yml
-  conda activate SimVP
-```
-
-### Moving MNIST dataset
+Poetryでインストールできます。
 
 ```
-  cd ./data/moving_mnist
-  bash download_mmnist.sh
+  git clone git@github.com:NIBB-Neurophysiology-Lab/SimVP-Simpler-yet-Better-Video-Prediction.git
+  cd SimVP-Simpler-yet-Better-Video-Prediction
+  poetry install
 ```
 
+### Dataset
+サンプルのデータセットを`data/image_list`に保存しています。
+
+
 ```
-python main.py --dataname mmnist --input_len 10 --size 64,64 --channel 1
+  cd ./data/image_list
+  tree data/
+data/
+├── frame_00000.jpg
+├── frame_00001.jpg
+├── frame_00002.jpg
+├── frame_00003.jpg
+├── frame_00004.jpg
+├── frame_00005.jpg
+├── frame_00006.jpg
+├── frame_00007.jpg
+├── frame_00008.jpg
+├── frame_00009.jpg
+├── frame_00010.jpg
+├── frame_00011.jpg
+├── frame_00012.jpg
+├── frame_00013.jpg
+├── frame_00014.jpg
+├── frame_00015.jpg
+├── frame_00016.jpg
+├── frame_00017.jpg
+├── frame_00018.jpg
+├── frame_00019.jpg
+├── frame_00020.jpg
+├── test_list.txt
+├── train_list.txt
+├── train_list_x.txt
+└── train_list_xt.txt
+
 ```
 
-### TaxiBJ dataset
+以下のコマンドで実行します。
 
-We provide a [Dropbox](https://www.dropbox.com/sh/l9drnyeftcmy3j1/AACCgUyOj2akPNBwFAe9W1-ia?dl=0) to download TaxiBJ dataset. Users can download this dataset and put it into `./data/taxibj`.
+```
+python main.py
+```
 
-### KTH dataset
+実行すると`results/images`に画像が保存されます。
+画像は`<イテレーション数>_<フレーム数>x.jpg`で入力画像が保存され、`<イテレーション数>_<フレーム数>y.jpg`で予測画像が保存されます。
+本アルゴリズムでは入力フレーム数が出力フレーム数となり、入力フレーム数と同じ数の予測画像が出力される形になっています。
+フレーム数を変えて実行する方法は以下のようになります。
 
-We provide a [Dropbox](https://www.dropbox.com/sh/8d3uwyp4jru0yih/AABP-nXlN6eHW2xOrkfCn7Woa?dl=0) to download the KTH dataset.
+```
+python main.py --input_len 20
+```
+
+画像サイズの変更は以下のように行います。
+
+```
+python main.py --size 320,240
+```
+
+デフォルトでは500エポックで計算しており、100エポック毎にチェックポイントを`results/Debug/checkpoints`に保存しています。
+保存したチェックポイントから学習を開始する際は以下のように実行します。
+
+```
+python main.py --modelfile results/Debug/checkpoints/100.pth
+```
 
 
 ## Citation
