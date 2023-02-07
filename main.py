@@ -36,6 +36,8 @@ def create_parser():
     parser.add_argument('--epochs', default=500, type=int)
     parser.add_argument('--log_step', default=1, type=int)
     parser.add_argument('--lr', default=0.01, type=float, help='Learning rate')
+
+    parser.add_argument('--modelfile', default="", type=str)
     return parser
 
 

@@ -91,11 +91,17 @@ class Exp:
         self._get_data()
         # build the model
         self._build_model()
+        if self.args.modelfile:
+            self._load_model(self.args.modelfile)
 
     def _build_model(self):
         args = self.args
         self.model = SimVP((args.input_len, args.channel, args.size[0], args.size[1]), args.hid_S,
                            args.hid_T, args.N_S, args.N_T).to(self.device)
+
+    def _load_model(self, filename):
+        print_log('Load model from {}'.format(filename))
+        self.model.load_state_dict(torch.load(filename))
 
     def _get_data(self):
         config = self.args.__dict__
