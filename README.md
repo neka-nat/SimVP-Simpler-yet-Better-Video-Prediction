@@ -105,6 +105,11 @@ python main.py --size 320,240
 python main.py --modelfile results/Debug/checkpoints/100.pth
 ```
 
+テストのみ実行する場合は以下のように実行します。
+
+```
+python main.py --modelfile results/Debug/checkpoints/100.pth --test
+```
 
 ## Citation
 

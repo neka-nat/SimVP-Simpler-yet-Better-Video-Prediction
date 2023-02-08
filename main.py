@@ -38,6 +38,7 @@ def create_parser():
     parser.add_argument('--lr', default=0.01, type=float, help='Learning rate')
 
     parser.add_argument('--modelfile', default="", type=str)
+    parser.add_argument('--test', action='store_true')
     return parser
 
 
@@ -49,7 +50,8 @@ if __name__ == '__main__':
     config = args.__dict__
 
     exp = Exp(args)
-    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>  start <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
-    exp.train(args)
+    if not args.test:
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>  start <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+        exp.train(args)
     print('>>>>>>>>>>>>>>>>>>>>>>>>>>>> testing <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
     mse = exp.test(args)
