@@ -135,7 +135,6 @@ class Exp:
             self.model.train()
             train_pbar = tqdm(self.train_loader)
 
-            fn = 0
             for batch_x, batch_y in train_pbar:
                 self.optimizer.zero_grad()
                 batch_x, batch_y = batch_x.to(self.device), batch_y.to(self.device)
@@ -161,7 +160,6 @@ class Exp:
                             'results/images/' + str(count) + '_' + str(batch_x.shape[1] + j) + 'y',
                         )
                 count += len(batch_x) * args.input_len
-                fn += len(batch_x) * args.input_len
 
             train_loss = np.average(train_loss)
 
@@ -207,10 +205,22 @@ class Exp:
     def test(self, args):
         self.model.eval()
         inputs_lst, trues_lst, preds_lst = [], [], []
+        count = 0
         for batch_x, batch_y in self.test_loader:
             pred_y = self.model(batch_x.to(self.device))
             list(map(lambda data, lst: lst.append(data.detach().cpu().numpy()), [
                  batch_x, batch_y, pred_y], [inputs_lst, trues_lst, preds_lst]))
+            for j in range(batch_x.shape[1]):
+                write_image(
+                    batch_x[0, j].detach().cpu().numpy(),
+                    'results/images/test_' + str(count) + '_' + str(j) + 'x',
+                )
+            for j in range(batch_y.shape[1]):
+                write_image(
+                    pred_y[0, j].detach().cpu().numpy(),
+                    'results/images/test_' + str(count) + '_' + str(batch_x.shape[1] + j) + 'y',
+                )
+            count += len(batch_x) * args.input_len
 
         inputs, trues, preds = map(lambda data: np.concatenate(
             data, axis=0), [inputs_lst, trues_lst, preds_lst])
