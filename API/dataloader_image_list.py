@@ -92,8 +92,8 @@ def load_data(
         data_root, num_workers,
         image_size, input_len, channel):
 
-    train_list = load_list(data_root + 'image_list/data/train_list.txt', os.path.join(data_root, 'image_list'))
-    test_list = load_list(data_root + 'image_list/data/test_list.txt', os.path.join(data_root, 'image_list'))
+    train_list = load_list(os.path.join(data_root, 'image_list/data/train_list.txt'), os.path.join(data_root, 'image_list'))
+    test_list = load_list(os.path.join(data_root, 'image_list/data/test_list.txt'), os.path.join(data_root, 'image_list'))
 
     train_set = ImageListDataset(image_size, input_len, channel)
     test_set = ImageListDataset(image_size, input_len, channel)
